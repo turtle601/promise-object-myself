@@ -37,7 +37,7 @@ describe('My Promise 테스트 동작 테스트 확인', () => {
     const input = 2;
 
     console.log = jest.fn();
-    myPromiseFn(input).then((error) => console.log(error.message));
+    myPromiseFn(input).catch((error) => console.log(error.message));
 
     expect(console.log).toHaveBeenCalledWith('실패');
   });
