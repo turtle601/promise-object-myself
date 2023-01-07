@@ -23,13 +23,17 @@ class MyPromise {
   }
 
   then(callback) {
-    callback(this.value);
+    if (this.state === PROMISES_STATE.fulfilled) {
+      callback(this.value);
+    }
 
     return this;
   }
 
   catch(callback) {
-    callback(this.value);
+    if (this.state === PROMISES_STATE.rejected) {
+      callback(this.value);
+    }
 
     return this;
   }
