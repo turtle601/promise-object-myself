@@ -13,20 +13,20 @@ class MyPromise {
     }
   }
 
-  #resolve(value) {
+  #update(state, value) {
     queueMicrotask(() => {
-      this.state = PROMISES_STATE.fulfilled;
+      this.state = state;
       this.value = value;
       this.lastcalls.forEach((lastcall) => lastcall());
     });
   }
 
+  #resolve(value) {
+    this.#update(PROMISES_STATE.fulfilled, value);
+  }
+
   #reject(error) {
-    queueMicrotask(() => {
-      this.state = PROMISES_STATE.rejected;
-      this.value = error;
-      this.lastcalls.forEach((lastcall) => lastcall());
-    });
+    this.#update(PROMISES_STATE.rejected, error);
   }
 
   #asyncResolve(callback) {
