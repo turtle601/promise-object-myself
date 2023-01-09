@@ -1,10 +1,16 @@
 const { PROMISES_STATE } = require('./utils/constants');
 
 class MyPromise {
+  #state;
+
+  #value;
+
+  #lastcalls;
+
   constructor(executor) {
-    this.state = PROMISES_STATE.pending;
-    this.value = null;
-    this.lastcalls = [];
+    this.#state = PROMISES_STATE.pending;
+    this.#value = null;
+    this.#lastcalls = [];
 
     try {
       executor(this.#resolve.bind(this), this.#reject.bind(this));
@@ -15,9 +21,9 @@ class MyPromise {
 
   #update(state, value) {
     queueMicrotask(() => {
-      this.state = state;
-      this.value = value;
-      this.lastcalls.forEach((lastcall) => lastcall());
+      this.#state = state;
+      this.#value = value;
+      this.#lastcalls.forEach((lastcall) => lastcall());
     });
   }
 
@@ -30,9 +36,9 @@ class MyPromise {
   }
 
   #asyncResolve(callback) {
-    if (this.state === PROMISES_STATE.pending) {
+    if (this.#state === PROMISES_STATE.pending) {
       return new MyPromise((resolve) =>
-        this.lastcalls.push(() => resolve(callback(this.value)))
+        this.#lastcalls.push(() => resolve(callback(this.#value)))
       );
     }
 
@@ -40,8 +46,8 @@ class MyPromise {
   }
 
   #syncResolve(callback) {
-    if (this.state === PROMISES_STATE.fulfilled) {
-      return new MyPromise((resolve) => resolve(callback(this.value)));
+    if (this.#state === PROMISES_STATE.fulfilled) {
+      return new MyPromise((resolve) => resolve(callback(this.#value)));
     }
 
     return null;
@@ -52,8 +58,8 @@ class MyPromise {
   }
 
   catch(callback) {
-    if (this.state === PROMISES_STATE.rejected) {
-      callback(this.value);
+    if (this.#state === PROMISES_STATE.rejected) {
+      callback(this.#value);
     }
 
     return this;
