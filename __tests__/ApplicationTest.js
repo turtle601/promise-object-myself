@@ -93,4 +93,95 @@ describe('MyPromise 테스트 동작 테스트 확인', () => {
 
     jest.runAllTimers();
   });
+
+  test('(종합) 프로미스 에러 처리 1 - then - then - catch', () => {
+    jest.useFakeTimers();
+    console.log = jest.fn();
+
+    myPromiseFn2(2)
+      .then((v) => {
+        console.log(v);
+        return v;
+      })
+      .then((v) => console.log(v))
+      .catch((v) => console.log(v));
+
+    setTimeout(() => {
+      expect(console.log).toHaveBeenCalledWith('실패');
+    }, 1001);
+
+    jest.runAllTimers();
+  });
+
+  test('(종합) 프로미스 에러 처리 2 - then - then - catch - then', () => {
+    jest.useFakeTimers();
+    console.log = jest.fn();
+
+    myPromiseFn2(2)
+      .then((v) => {
+        console.log(v);
+        return v;
+      })
+      .then((v) => console.log(v))
+      .catch((v) => {
+        console.log(v);
+        return '이게 무람?';
+      })
+      .then((v) => console.log(v));
+
+    setTimeout(() => {
+      expect(console.log).toHaveBeenCalledWith('실패');
+      expect(console.log).toHaveBeenCalledWith('이게 무람?');
+    }, 1001);
+
+    jest.runAllTimers();
+  });
+
+  test('(종합) 프로미스 에러 처리 3 - then - then - catch - then, 첫번째 then 에서 에러 발생 시', () => {
+    jest.useFakeTimers();
+    console.log = jest.fn();
+
+    myPromiseFn2(1)
+      .then((v) => {
+        console.log(v);
+        throw new Error('실패');
+      })
+      .then((v) => console.log(v))
+      .catch((error) => {
+        console.log(error.message);
+        return '이게 무람?';
+      })
+      .then((v) => console.log(v));
+
+    setTimeout(() => {
+      expect(console.log).toHaveBeenCalledWith('성공');
+      expect(console.log).toHaveBeenCalledWith('실패');
+      expect(console.log).toHaveBeenCalledWith('이게 무람?');
+    }, 1001);
+
+    jest.runAllTimers();
+  });
+
+  test('(종합) 프로미스 에러 처리 3 - then - catch - then, 에러 발생을 하지 않는다면?', () => {
+    jest.useFakeTimers();
+    console.log = jest.fn();
+
+    myPromiseFn2(1)
+      .then((v) => {
+        console.log(v);
+        return v;
+      })
+      .catch((error) => {
+        console.log(error.message);
+        return '이게 무람?';
+      })
+      .then((v) => console.log(v));
+
+    setTimeout(() => {
+      expect(console.log).toHaveBeenCalledWith('성공');
+      expect(console.log).toHaveBeenCalledWith('성공');
+    }, 1001);
+
+    jest.runAllTimers();
+  });
 });
