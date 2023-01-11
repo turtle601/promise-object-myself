@@ -184,4 +184,32 @@ describe('MyPromise 테스트 동작 테스트 확인', () => {
 
     jest.runAllTimers();
   });
+
+  test('(종합) Promise.prototype.finally 테스트 - then - finally - catch - then, 에러 발생한다면?', () => {
+    jest.useFakeTimers();
+    console.log = jest.fn();
+
+    myPromiseFn2(1)
+      .then((v) => {
+        console.log(v);
+        throw new Error('실패');
+      })
+      .finally(() => {
+        console.log('finally');
+      })
+      .catch((error) => {
+        console.log(error.message);
+        return '이게 무람?';
+      })
+      .then((v) => console.log(v));
+
+    setTimeout(() => {
+      expect(console.log).toHaveBeenCalledWith('성공');
+      expect(console.log).toHaveBeenCalledWith('finally');
+      expect(console.log).toHaveBeenCalledWith('실패');
+      expect(console.log).toHaveBeenCalledWith('이게 무람?');
+    }, 0);
+
+    jest.runAllTimers();
+  });
 });
