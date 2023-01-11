@@ -212,4 +212,33 @@ describe('MyPromise 테스트 동작 테스트 확인', () => {
 
     jest.runAllTimers();
   });
+
+  test('(종합) 프라미스 내부에 프로미스가 있을 경우 동작 테스트', () => {
+    jest.useFakeTimers();
+    console.log = jest.fn();
+
+    new MyPromise((resolve, reject) => {
+      setTimeout(() => {
+        resolve('첫번째 프라미스');
+      }, 1000);
+    })
+      .then((res) => {
+        console.log(res);
+        return new MyPromise((resolve, reject) => {
+          setTimeout(() => {
+            resolve('두번째 프라미스');
+          }, 1000);
+        });
+      })
+      .then((res) => {
+        console.log(res);
+      });
+
+    setTimeout(() => {
+      expect(console.log).toHaveBeenCalledWith('첫번째 프라미스');
+      expect(console.log).toHaveBeenCalledWith('두번째 프라미스');
+    }, 2001);
+
+    jest.runAllTimers();
+  });
 });
