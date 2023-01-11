@@ -108,7 +108,7 @@ describe('MyPromise 테스트 동작 테스트 확인', () => {
 
     setTimeout(() => {
       expect(console.log).toHaveBeenCalledWith('실패');
-    }, 1001);
+    }, 0);
 
     jest.runAllTimers();
   });
@@ -132,7 +132,7 @@ describe('MyPromise 테스트 동작 테스트 확인', () => {
     setTimeout(() => {
       expect(console.log).toHaveBeenCalledWith('실패');
       expect(console.log).toHaveBeenCalledWith('이게 무람?');
-    }, 1001);
+    }, 0);
 
     jest.runAllTimers();
   });
@@ -157,7 +157,7 @@ describe('MyPromise 테스트 동작 테스트 확인', () => {
       expect(console.log).toHaveBeenCalledWith('성공');
       expect(console.log).toHaveBeenCalledWith('실패');
       expect(console.log).toHaveBeenCalledWith('이게 무람?');
-    }, 1001);
+    }, 0);
 
     jest.runAllTimers();
   });
@@ -180,7 +180,7 @@ describe('MyPromise 테스트 동작 테스트 확인', () => {
     setTimeout(() => {
       expect(console.log).toHaveBeenCalledWith('성공');
       expect(console.log).toHaveBeenCalledWith('성공');
-    }, 1001);
+    }, 0);
 
     jest.runAllTimers();
   });
