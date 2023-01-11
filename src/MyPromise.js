@@ -32,6 +32,10 @@ class MyPromise {
   #update(state, value) {
     queueMicrotask(() => {
       if (this.#state !== PROMISES_STATE.pending) return;
+      if (value instanceof MyPromise) {
+        // eslint-disable-next-line consistent-return
+        return value.then(this.#resolve.bind(this), this.#reject.bind(this));
+      }
       this.#state = state;
       this.#value = value;
       this.#runCallbacks();
