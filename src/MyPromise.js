@@ -1,17 +1,15 @@
 const { PROMISES_STATE } = require('./utils/constants');
 
 class MyPromise {
-  #state;
+  #value = null;
 
-  #value;
+  #state = PROMISES_STATE.pending;
 
-  #lastcalls;
+  #catchCallbacks = [];
+
+  #thenCallbacks = [];
 
   constructor(executor) {
-    this.#state = PROMISES_STATE.pending;
-    this.#value = null;
-    this.#lastcalls = [];
-
     try {
       executor(this.#resolve.bind(this), this.#reject.bind(this));
     } catch (error) {
@@ -19,11 +17,24 @@ class MyPromise {
     }
   }
 
+  #runCallbacks() {
+    if (this.#state === PROMISES_STATE.fulfilled) {
+      this.#thenCallbacks.forEach((callback) => callback(this.#value));
+      this.#thenCallbacks = [];
+    }
+
+    if (this.#state === PROMISES_STATE.rejected) {
+      this.#catchCallbacks.forEach((callback) => callback(this.#value));
+      this.#catchCallbacks = [];
+    }
+  }
+
   #update(state, value) {
     queueMicrotask(() => {
+      if (this.#state !== PROMISES_STATE.pending) return;
       this.#state = state;
       this.#value = value;
-      this.#lastcalls.forEach((lastcall) => lastcall());
+      this.#runCallbacks();
     });
   }
 
@@ -35,34 +46,38 @@ class MyPromise {
     this.#update(PROMISES_STATE.rejected, error);
   }
 
-  #asyncResolve(callback) {
-    if (this.#state === PROMISES_STATE.pending) {
-      return new MyPromise((resolve) =>
-        this.#lastcalls.push(() => resolve(callback(this.#value)))
-      );
-    }
+  then(thenCallback, catchCallback) {
+    return new MyPromise((resolve, reject) => {
+      this.#thenCallbacks.push((value) => {
+        if (!thenCallback) {
+          resolve(value);
+          return;
+        }
 
-    return null;
+        try {
+          resolve(thenCallback(value));
+        } catch (error) {
+          reject(error);
+        }
+      });
+
+      this.#catchCallbacks.push((value) => {
+        if (!catchCallback) {
+          reject(value);
+          return;
+        }
+
+        try {
+          resolve(catchCallback(value));
+        } catch (error) {
+          reject(error);
+        }
+      });
+    });
   }
 
-  #syncResolve(callback) {
-    if (this.#state === PROMISES_STATE.fulfilled) {
-      return new MyPromise((resolve) => resolve(callback(this.#value)));
-    }
-
-    return null;
-  }
-
-  then(callback) {
-    return this.#asyncResolve(callback) || this.#syncResolve(callback);
-  }
-
-  catch(callback) {
-    if (this.#state === PROMISES_STATE.rejected) {
-      callback(this.#value);
-    }
-
-    return this;
+  catch(catchCallback) {
+    return this.then(undefined, catchCallback);
   }
 }
 
